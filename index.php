@@ -76,7 +76,7 @@
 							<div class=\"header-ctn\">
 								<!-- Messages -->
 								<div>
-									<a href=\"\">
+									<a href=\"messages.php\">
 										<i class=\"fa fa-envelope\"></i>
 										<span>Messages</span>
 									</a>
@@ -303,15 +303,10 @@ while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)){
 									}
 									else {
 										echo "<button class=\"add-to-wishlist\" onclick=\"location.href='wishlist2.php?id=".$row['ID']."'\"><i class=\"fa fa-heart-o\"></i><span class=\"tooltipp\">add to wishlist</span></button>
-										<button class=\"message-owner\"><i class=\"fa fa-envelope\"></i><span class=\"tooltipp\">message owner</span></button>
+										<button class=\"message-owner\" onclick=\"location.href='chat.php?p_id=" . $row['ID'] . "&chat_user=" . $row['Owner'] . "'\"><i class=\"fa fa-envelope\"></i><span class=\"tooltipp\">message owner</span></button>
 										<button class=\"quick-view\" onclick=\"location.href='product.php?id=".$row['ID']."'\"><i class=\"fa fa-eye\"></i><span class=\"tooltipp\">quick view</span></button>";
 									}
 								} 
-							}
-							else {
-									echo " <button class=\"add-to-wishlist\"><i class=\"fa fa-heart-o\"></i><span class=\"tooltipp\">add to wishlist</span></button>
-									<button class=\"message-owner\"><i class=\"fa fa-envelope\"></i><span class=\"tooltipp\">message owner</span></button>
-									<button class=\"quick-view\" onclick=\"location.href='product.php?id=".$row['ID']."'\"><i class=\"fa fa-eye\"></i><span class=\"tooltipp\">quick view</span></button>";
 							}
 							echo "</div>
 						</div>

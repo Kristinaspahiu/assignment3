@@ -67,7 +67,7 @@
 								
 									 <!-- WISHLIST -->
 									<div>
-										<a href=\"newitem.php\">
+										<a href=\"wishlist.php\">
 											<i class=\"fa fa-heart\"></i>
 											<span>Wishlist</span>
 										</a>
@@ -75,7 +75,7 @@
 									<!--/WISHLIST -->
 									<!-- Messages -->
 									<div>
-											<a href=\"chat.php\">
+											<a href=\"messages.php\">
 											<i class=\"fa fa-envelope\"></i> 
 											<span>Messages</span>
 										</a>

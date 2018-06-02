@@ -25,6 +25,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
    $hash=$row["Password"]; 
    if($count == 1 && password_verify($mypassword, $hash )) 
    {
+        $_SESSION['user_id'] = $row["ID"];
         $_SESSION['login_user'] = $myusername;
         $_SESSION['rights'] = $row["Rights"];
         header("location: index.php");

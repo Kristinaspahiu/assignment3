@@ -10,9 +10,36 @@ $conn = new mysqli($host, $user, $pass,"assignment3");
 if($conn->connect_error) 
     die($conn->connect_error);
 
-$itemID =  htmlspecialchars(mysqli_real_escape_string($conn, $_REQUEST['p_id']));
-$result = $conn-> query("SELECT * FROM Items WHERE ID='$itemID'");
-$productData =mysqli_fetch_array($result, MYSQLI_ASSOC);
+$logged_user =$_SESSION['user_id'];
+$sql = "SELECT u.username as Reciever, u.ID as RecieverID, u1.username as Sender, u1.ID as SenderID, i.ID as ProductID, i.Name as ProductName, i.Category, i.Owner
+        FROM message m
+        INNER JOIN users u ON m.Reciever = u.ID
+        INNER JOIN users u1 ON m.Sender = u1.ID
+        INNER JOIN items i ON m.Item = i.ID
+        WHERE Sender = '$logged_user' OR Reciever = '$logged_user'
+        GROUP BY Item";
+
+$result= mysqli_query($conn,$sql);
+
+$messages = array();
+while ($row=mysqli_fetch_array($result)){
+    /* Check which user is on the other side of the conversation */
+    $conversationBuddy = $row['Reciever'];
+    $conversationBuddyID = $row['RecieverID'];
+    if($row['Reciever'] == $_SESSION['login_user']) {
+        $conversationBuddy = $row['Sender'];
+        $conversationBuddyID = $row['SenderID'];
+    }
+    array_push($messages, array(
+        'product_id' => $row['ProductID'],
+        'convo_user' => $conversationBuddy,
+        'convo_user_id' => $conversationBuddyID,
+        'product_name' => $row['ProductName'],
+        'product_category' => $row['Category'],
+        'owner' => $row['Owner']
+    ));
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -27,7 +54,8 @@ $productData =mysqli_fetch_array($result, MYSQLI_ASSOC);
 
       <!-- Google font -->
       <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
-
+      <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet"/>
+        
       <!-- Bootstrap -->
       <link type="text/css" rel="stylesheet" href="css/bootstrap.min.css"/>
 
@@ -88,9 +116,6 @@ $productData =mysqli_fetch_array($result, MYSQLI_ASSOC);
        </header>
        <!-- /HEADER -->
 
-      
-
-
        <!-- SECTION -->
        <div class="section">
            <!-- container -->
@@ -105,48 +130,38 @@ $productData =mysqli_fetch_array($result, MYSQLI_ASSOC);
                             <div class="container">
                                 <!-- row -->
                                 <div class="row">
-                                    <!--chat -->
-                                    <div class="col-md-8">
-                                        <div id="frame">
-                                            <div class="chat-content">
-                                                <div class="contact-profile">
-                                                    <p>Messages</p>
-                                                </div>
-                                                <div class="messages" id="messages">
-                                                    <ul id="msg-list">
-                                                        
-                                                    </ul>
-                                                </div>
-                                                <div class="message-input">
-                                                    <div class="wrap">
-                                                        <input id="usermsg" name="usermsg" class="chat-text" type="text" placeholder="Write your message..." />
-                                                        <button class="submit" id="sendMSG" onclick="sendMsg(<?=$_REQUEST['p_id']?>, <?=$_REQUEST['chat_user']?>)"><i class="sendbutton fa fa-paper-plane" aria-hidden="true"></i></button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <!--message list -->
+                                    <div class="col-md-12">
+                                        <table id="entries" class="display" style="width:100%">
+                                            <thead>
+                                                <tr>
+                                                    <th> User </th>
+                                                    <th> Product </th>
+                                                    <th> Product Category </th>
+                                                    <th> Actions </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                            <?php
+                                                for ($x = 0; $x < count($messages); $x++) {
+                                                    $tableRow = "<tr>";
+                                                    $tableRow .= "<td>" . $messages[$x]["convo_user"] . "</td>";
+                                                    $tableRow .= "<td>" . $messages[$x]["product_name"] . "</td>";
+                                                    $tableRow .= "<td>" . $messages[$x]["product_category"] . "</td>";
+                                                    $tableRow .= "<td>
+                                                    <a
+                                                    href='chat.php?p_id=".$messages[$x]["product_id"]."&chat_user=".$messages[$x]["convo_user_id"]."' class='btn btn-info'>
+                                                    View Conversation 
+                                                    </a>
+                                                    </td>";
+                                                    $tableRow .= "</tr>";
+                                                    echo $tableRow;
+                                                }
+                                            ?>
+                                            </tbody>
+                                        </table>
                                     </div>
-                                    <!-- /chat -->
-
-                                    <!-- item -->
-                                    <?php if($productData != null){ ?>
-                                    <div class="col-md-4">
-                                        <div class="product">
-                                            <div class="product-img">
-                                                <img src="./img/<?=$productData['Image']?>" alt="" style="width: 80%;">
-                                            </div>
-                                            <div class="product-body">
-                                                <p class="product-category">Category: <strong><?=$productData['Category']?></strong></p>
-                                                <h3 class="product-name"><a href="#"><?=$productData['Name']?></a></h3>
-                                                <div class="product-btns">
-                                                    <button class="add-to-wishlist" onclick="location.href='wishlist2.php?id=<?=$productData['ID']?>'" ><i class="fa fa-heart-o"></i><span class="tooltipp">add to wishlist</span></button>
-                                                    <button class="quick-view" onclick="location.href='product.php?id=<?=$productData['ID']?>'" ><i class="fa fa-eye"></i><span class="tooltipp">quick view</span></button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <?php } ?>
-                                    <!-- /item -->
+                                    <!-- /message list -->
                                 </div>
                             </div>
                         </div>
@@ -229,69 +244,12 @@ $productData =mysqli_fetch_array($result, MYSQLI_ASSOC);
 		<script src="js/bootstrap.min.js"></script>
 		<script src="js/slick.min.js"></script>
 		<script src="js/nouislider.min.js"></script>
-		<script src="js/jquery.zoom.min.js"></script>
-
-        <script type="text/javascript">
-            $( document ).ready(function() {
-                /* Scroll messages to bottom of div */
-                var element = document.getElementById("messages");
-                var p_id = get('p_id');
-                var chat_user = get('chat_user');
-
-                /* When the document loads up, fetch all messages for this conversation */
-                $.get('chat/sync_chat.php', {p_id, chat_user, get_all: true}, function(data) {
-                    data.forEach(function(msg) {
-                        if(msg['is_reply']) {
-                            $( "#msg-list" ).append( "<li class=\"replies\"><p> " + msg['msg'] + " </p></li>" );
-                        } else {
-                            $( "#msg-list" ).append( "<li class=\"sent\"><p> " + msg['msg'] + " </p></li>" );
-                        }
-                    });
-
-                    /* Scroll the message area all the way down to the latest messages */
-                    element.scrollTop = element.scrollHeight;
-                });
-
-                // Execute a function when the user releases a key on the keyboard
-                $("#usermsg").keyup(function(event) {
-                    // Cancel the default action, if needed
-                    event.preventDefault();
-                    // Number 13 is the "Enter" key on the keyboard
-                    if (event.keyCode === 13) {
-                        // Trigger the button element with a click
-                        $( "#sendMSG" ).click();
-                    }
-                });
-
-                /* Periodical function that checks for new messages every 2 seconds */
-                (function worker() {
-                    $.get('chat/sync_chat.php', {p_id, sync: true}, function(data) {
-                        console.log(data);
-                        if(data['new_msg']) {
-                            $( "#msg-list" ).append( "<li class=\"sent\"><p> " + data['msg'] + " </p></li>" );
-                            element.scrollTop = element.scrollHeight;
-                        }
-                         // Now that we've completed the request schedule the next one.
-                        setTimeout(worker, 2000);
-                    });
-                })();
-            });
-            
-            /* Function for sending a new message to the conversation */
-            function sendMsg(p_id, chat_user) {
-                var clientmsg = $("#usermsg").val();
-                $.post("chat/sendmsg.php", {text: clientmsg, p_id, chat_user});			
-                $("#usermsg").val("");
-                $( "#msg-list" ).append( "<li class=\"replies\"><p> " + clientmsg + " </p></li>" );
-                var element = document.getElementById("messages");
-                element.scrollTop = element.scrollHeight;
-            }
-
-            /* Function that parses the url GET arguments for assigning to javascript variables */
-            function get(name){
-                if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
-                    return decodeURIComponent(name[1]);
-            }
-        </script>
+        <script src="js/jquery.zoom.min.js"></script>
+        <script src="js/jquery.dataTables.min.js"></script>
+        <script>
+    $(document).ready(function() {
+        $('#entries').DataTable();
+    });
+    </script>
 	</body>
 </html>

@@ -1,35 +1,37 @@
 <?php
 
 session_start();
-if(isset($_POST["Signup"])) {
+if($_SERVER["REQUEST_METHOD"] == "POST"){
   
    $host = 'localhost';
    $user = 'root';
    $pass = '';
    
-  $conn = new mysqli($host, $user, $pass,"assignment3");
+    $conn = new mysqli($host, $user, $pass,"assignment3");
 
-  if($conn->connect_error) 
-   die($conn->connect_error);
-   $username=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['username']));
-$result = $conn-> query("SELECT ID FROM users WHERE Username='$username'");
-$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    if($conn->connect_error) 
+        die($conn->connect_error);
    
-$count = mysqli_num_rows($result);
-  if($count==0) {
-    $email=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['email']));
-    $name=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['name']));
-    $surname=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['surname']));      
-    $password=htmlspecialchars(mysqli_real_escape_string($conn,password_hash($_POST['password'], PASSWORD_DEFAULT )));
-    $conn->query("INSERT INTO users(Name,Surname,Email,Username,Password,Rights)
-    VALUES ('$name', '$surname','$email','$username','$password','0')"); 
-    $_SESSION['login_user'] = $username; 
-    $_SESSION['user_right'] = 0;
-    header("location: index.php");
+    $username=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['username']));
+    $result = $conn-> query("SELECT ID FROM users WHERE Username='$username'");
+    $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
+   
+    $count = mysqli_num_rows($result);
+    if($count==0) {
+        $email=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['email']));
+        $name=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['name']));
+        $surname=htmlspecialchars(mysqli_real_escape_string($conn,$_POST['surname']));      
+        $password=htmlspecialchars(mysqli_real_escape_string($conn,password_hash($_POST['password'], PASSWORD_DEFAULT )));
+        $conn->query("INSERT INTO users(Name,Surname,Email,Username,Password,Rights)
+        VALUES ('$name', '$surname','$email','$username','$password','0')"); 
+        $_SESSION['login_user'] = $username; 
+        $_SESSION['user_right'] = 0;
+        header("location: index.php");
     }
     else {   
 		$message = "This username already exists.\\nTry again.";
-		echo "<script type='text/javascript'>alert('$message');</script>"; }
+        echo "<script type='text/javascript'>alert('$message');</script>";
+    }
 }
 ?>
 
