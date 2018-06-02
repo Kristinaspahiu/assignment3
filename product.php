@@ -167,17 +167,11 @@
 								else {
 									echo " <ul class=\"product-btns\" style=\"padding-top: 4%;\">
 									<li><a href=\"#\"><i class=\"fa fa-heart-o\"></i> add to wishlist</a></li>
-									<li><a href=\"#\"><i class=\"fa fa-envelope\"></i> message owner</a></li>
+									<li><a href=\"chat.php?p_id=" . $row['ID'] . "&chat_user=" . $row['Owner'] . "\"><i class=\"fa fa-envelope\"></i> message owner</a></li>
 									</ul>";
 								}
 							}
  
-							}
-							else {
-								echo " <ul class=\"product-btns\" style=\"padding-top: 4%;\">
-								<li><a href=\"#\"><i class=\"fa fa-heart-o\"></i> add to wishlist</a></li>
-								<li><a href=\"#\"><i class=\"fa fa-envelope\"></i> message owner</a></li>
-								</ul>";
 							}
 
 						echo"<ul class=\"product-links\" style=\"padding-top: 4%;\">
