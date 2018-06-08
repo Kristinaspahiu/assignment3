@@ -24,6 +24,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $password=htmlspecialchars(mysqli_real_escape_string($conn,password_hash($_POST['password'], PASSWORD_DEFAULT )));
         $conn->query("INSERT INTO users(Name,Surname,Email,Username,Password,Rights)
         VALUES ('$name', '$surname','$email','$username','$password','0')"); 
+        $last_id = $conn->insert_id;
+        $_SESSION['user_id'] = $last_id;
         $_SESSION['login_user'] = $username; 
         $_SESSION['user_right'] = 0;
         header("location: index.php");
